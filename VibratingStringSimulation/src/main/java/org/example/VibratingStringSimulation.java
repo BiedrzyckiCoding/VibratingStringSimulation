@@ -33,67 +33,88 @@ public class VibratingStringSimulation {
         ArrayList<Double> v0 = new ArrayList<>();
         ArrayList<Double> a0 = new ArrayList<>();
 
-        // set y(x,0) and v(x,0)
+        // Set y(x,0) and v(x,0)
         for (int i = 0; i <= N; i++) {
             double xi = i * dx;
-            // fixed ends at i=0 and i=N
             if (i == 0 || i == N) {
                 y0.add(0.0);
                 v0.add(0.0);
             } else {
-                y0.add(Math.sin(xi) / 1000.0); // initial sine displacement (scaled)
-                v0.add(0.0); // start from rest
+                y0.add(Math.sin(xi) / 1000.0);
+                v0.add(0.0);
             }
         }
-
-        // compute a(x,0)
+        // Compute a(x,0)
         for (int i = 0; i <= N; i++) {
             if (i == 0 || i == N) {
                 a0.add(0.0);
             } else {
-                double val = (y0.get(i-1) - 2*y0.get(i) + y0.get(i+1)) / (dx*dx);
-                a0.add(val);
+                double d2y = (y0.get(i+1) - 2 * y0.get(i) + y0.get(i-1)) / (dx * dx);
+                a0.add(d2y);
             }
         }
-
-        // store initial snapshots
         Y.add(y0);
         V.add(v0);
         A.add(a0);
 
-        // --------- time loop (explicit Euler) -----------
+        // using midpoint method
         for (int t = 1; t <= steps; t++) {
             ArrayList<Double> yPrev = Y.get(t-1);
             ArrayList<Double> vPrev = V.get(t-1);
             ArrayList<Double> aPrev = A.get(t-1);
 
-            // new lists at time t
+            // half-step arrays
+            ArrayList<Double> yHalf = new ArrayList<>();
+            ArrayList<Double> vHalf = new ArrayList<>();
+            // compute midpoint values
+            for (int i = 0; i <= N; i++) {
+                if (i == 0 || i == N) {
+                    yHalf.add(0.0);
+                    vHalf.add(0.0);
+                } else {
+                    double vh = vPrev.get(i) + 0.5 * aPrev.get(i) * dt;
+                    double yh = yPrev.get(i) + 0.5 * vPrev.get(i) * dt;
+                    vHalf.add(vh);
+                    yHalf.add(yh);
+                }
+            }
+            // compute acceleration at half-step
+            ArrayList<Double> aHalf = new ArrayList<>();
+            for (int i = 0; i <= N; i++) {
+                if (i == 0 || i == N) {
+                    aHalf.add(0.0);
+                } else {
+                    double d2yh = (yHalf.get(i+1) - 2 * yHalf.get(i) + yHalf.get(i-1)) / (dx * dx);
+                    aHalf.add(d2yh);
+                }
+            }
+
+            // full-step arrays
             ArrayList<Double> yNew = new ArrayList<>();
             ArrayList<Double> vNew = new ArrayList<>();
             ArrayList<Double> aNew = new ArrayList<>();
 
-            // update y and v
+            // update to full step
             for (int i = 0; i <= N; i++) {
                 if (i == 0 || i == N) {
                     yNew.add(0.0);
                     vNew.add(0.0);
                 } else {
-                    double yi = yPrev.get(i) + vPrev.get(i) * dt;
-                    double vi = vPrev.get(i) + aPrev.get(i) * dt;
-                    yNew.add(yi);
-                    vNew.add(vi);
+                    double vfull = vPrev.get(i) + aHalf.get(i) * dt;
+                    double yfull = yPrev.get(i) + vHalf.get(i) * dt;
+                    vNew.add(vfull);
+                    yNew.add(yfull);
                 }
             }
-            // update acceleration at new time
+            // compute acceleration at full step
             for (int i = 0; i <= N; i++) {
                 if (i == 0 || i == N) {
                     aNew.add(0.0);
                 } else {
-                    double val = (yNew.get(i-1) - 2*yNew.get(i) + yNew.get(i+1)) / (dx*dx);
-                    aNew.add(val);
+                    double d2yFull = (yNew.get(i+1) - 2 * yNew.get(i) + yNew.get(i-1)) / (dx * dx);
+                    aNew.add(d2yFull);
                 }
             }
-
             Y.add(yNew);
             V.add(vNew);
             A.add(aNew);
