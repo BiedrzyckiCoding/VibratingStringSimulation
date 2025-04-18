@@ -120,6 +120,8 @@ public class VibratingStringSimulation {
             A.add(aNew);
         }
 
+        //END OF CALCULATION PART
+
         // JFreeChart integration
         XYSeriesCollection dispData = new XYSeriesCollection();
         for (int t = 0; t <= steps; t++) {
