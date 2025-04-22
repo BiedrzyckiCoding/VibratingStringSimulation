@@ -17,10 +17,10 @@ import org.jfree.data.xy.XYDataset;
 public class VibratingStringSimulation {
     public static void main(String[] args) {
         //initial parameters
-        int N = 10; // number of interior points, may add more to smoothen the graph, not important rn
-        double L = Math.PI; // string length
-        double dt = 0.3; // time step
-        int steps = 5; // number of time steps to record
+        int N = 10; //number of interior points, may add more to smoothen the graph, not important rn
+        double L = Math.PI; //string length
+        double dt = 0.3; //time step
+        int steps = 50; //number of time steps to record
         double dx = L / N; //partial step
 
         // Y, V, A are time-indexed: each element is a snapshot array for that time
@@ -28,12 +28,12 @@ public class VibratingStringSimulation {
         ArrayList<ArrayList<Double>> V = new ArrayList<>();
         ArrayList<ArrayList<Double>> A = new ArrayList<>();
 
-        // for t=0
+        //for t=0
         ArrayList<Double> y0 = new ArrayList<>();
         ArrayList<Double> v0 = new ArrayList<>();
         ArrayList<Double> a0 = new ArrayList<>();
 
-        // Set y(x,0) and v(x,0)
+        //set y(x,0) and v(x,0)
         for (int i = 0; i <= N; i++) {
             double xi = i * dx;
             if (i == 0 || i == N) {
@@ -44,7 +44,7 @@ public class VibratingStringSimulation {
                 v0.add(0.0);
             }
         }
-        // Compute a(x,0)
+        //compute a(x,0)
         for (int i = 0; i <= N; i++) {
             if (i == 0 || i == N) {
                 a0.add(0.0);
@@ -57,16 +57,16 @@ public class VibratingStringSimulation {
         V.add(v0);
         A.add(a0);
 
-        // using midpoint method
+        //midpoint method
         for (int t = 1; t <= steps; t++) {
             ArrayList<Double> yPrev = Y.get(t-1);
             ArrayList<Double> vPrev = V.get(t-1);
             ArrayList<Double> aPrev = A.get(t-1);
 
-            // half-step arrays
+            //half-step arrays
             ArrayList<Double> yHalf = new ArrayList<>();
             ArrayList<Double> vHalf = new ArrayList<>();
-            // compute midpoint values
+            //compute midpoint values
             for (int i = 0; i <= N; i++) {
                 if (i == 0 || i == N) {
                     yHalf.add(0.0);
@@ -78,7 +78,7 @@ public class VibratingStringSimulation {
                     yHalf.add(yh);
                 }
             }
-            // compute acceleration at half-step
+            //compute acceleration at half-step
             ArrayList<Double> aHalf = new ArrayList<>();
             for (int i = 0; i <= N; i++) {
                 if (i == 0 || i == N) {
@@ -89,12 +89,12 @@ public class VibratingStringSimulation {
                 }
             }
 
-            // full-step arrays
+            //full-step arrays
             ArrayList<Double> yNew = new ArrayList<>();
             ArrayList<Double> vNew = new ArrayList<>();
             ArrayList<Double> aNew = new ArrayList<>();
 
-            // update to full step
+            //update to full step
             for (int i = 0; i <= N; i++) {
                 if (i == 0 || i == N) {
                     yNew.add(0.0);
@@ -106,7 +106,7 @@ public class VibratingStringSimulation {
                     yNew.add(yfull);
                 }
             }
-            // compute acceleration at full step
+            //compute acceleration at full step
             for (int i = 0; i <= N; i++) {
                 if (i == 0 || i == N) {
                     aNew.add(0.0);
@@ -122,10 +122,10 @@ public class VibratingStringSimulation {
 
         //END OF CALCULATION PART
 
-        // JFreeChart integration
+        //JFreeChart integration
         XYSeriesCollection dispData = new XYSeriesCollection();
         for (int t = 0; t <= steps; t++) {
-            XYSeries s = new XYSeries("t=" + (t*dt));
+            XYSeries s = new XYSeries("t=" + t);
             ArrayList<Double> yt = Y.get(t);
             for (int i = 0; i <= N; i++) {
                 s.add(i*dx, yt.get(i));
@@ -135,7 +135,7 @@ public class VibratingStringSimulation {
         JFreeChart chart1 = createDisplacementChart(dispData);
         displayChart(chart1, "String Displacements");
 
-        // energy vs time
+        //energy vs time
         XYSeries eK = new XYSeries("Kinetic");
         XYSeries eP = new XYSeries("Potential");
         XYSeries eT = new XYSeries("Total");
